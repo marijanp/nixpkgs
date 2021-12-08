@@ -1,12 +1,15 @@
 from contextlib import contextmanager
 from pathlib import Path
+from test_driver.machine import Machine, NixStartScript, retry
+from test_driver.vlan import VLan
 from typing import Any, Dict, Iterator, List
+from test_driver.logger import serial_filter
+
+import logging
 import os
 import tempfile
 
-from test_driver.logger import rootlog
-from test_driver.machine import Machine, NixStartScript, retry
-from test_driver.vlan import VLan
+logger = logging.getLogger(__name__)
 
 
 class Driver:
@@ -29,8 +32,8 @@ class Driver:
         tmp_dir = Path(os.environ.get("TMPDIR", tempfile.gettempdir()))
         tmp_dir.mkdir(mode=0o700, exist_ok=True)
 
-        with rootlog.nested("start all VLans"):
-            self.vlans = [VLan(nr, tmp_dir) for nr in vlans]
+        logger.info("start all VLans")
+        self.vlans = [VLan(nr, tmp_dir) for nr in vlans]
 
         def cmd(scripts: List[str]) -> Iterator[NixStartScript]:
             for s in scripts:
@@ -50,19 +53,22 @@ class Driver:
         return self
 
     def __exit__(self, *_: Any) -> None:
-        with rootlog.nested("cleanup"):
-            for machine in self.machines:
-                machine.release()
+        logger.info("cleanup")
+        for machine in self.machines:
+            machine.release()
 
     def subtest(self, name: str) -> Iterator[None]:
         """Group logs under a given test name"""
-        with rootlog.nested(name):
-            try:
-                yield
-                return True
-            except Exception as e:
-                rootlog.error(f'Test "{name}" failed with error: "{e}"')
-                raise e
+        logger.info(name)
+        tic = time.time()
+        try:
+            yield
+            toc = time.time()
+            logger.info(f"(finished: {name}, in {(toc-tic):.2f} seconds)")
+            return True
+        except Exception as e:
+            logger.info(f'Test "{name}" failed with error: "{e}"')
+            raise e
 
     def test_symbols(self) -> Dict[str, Any]:
         @contextmanager
@@ -75,7 +81,7 @@ class Driver:
             machines=self.machines,
             vlans=self.vlans,
             driver=self,
-            log=rootlog,
+            log=logger,
             os=os,
             create_machine=self.create_machine,
             subtest=subtest,
@@ -106,9 +112,9 @@ class Driver:
 
     def test_script(self) -> None:
         """Run the test script"""
-        with rootlog.nested("run the VM test script"):
-            symbols = self.test_symbols()  # call eagerly
-            exec(self.tests, symbols, None)
+        logger.info("run the VM test script")
+        symbols = self.test_symbols()  # call eagerly
+        exec(self.tests, symbols, None)
 
     def run_tests(self) -> None:
         """Run the test script (for non-interactive test runs)"""
@@ -120,18 +126,18 @@ class Driver:
 
     def start_all(self) -> None:
         """Start all machines"""
-        with rootlog.nested("start all VMs"):
-            for machine in self.machines:
-                machine.start()
+        logger.info("start all VMs")
+        for machine in self.machines:
+            machine.start()
 
     def join_all(self) -> None:
         """Wait for all machines to shut down"""
-        with rootlog.nested("wait for all VMs to finish"):
-            for machine in self.machines:
-                machine.wait_for_shutdown()
+        logger.info("wait for all VMs to finish")
+        for machine in self.machines:
+            machine.wait_for_shutdown()
 
     def create_machine(self, args: Dict[str, Any]) -> Machine:
-        rootlog.warning(
+        logger.warning(
             "Using legacy create_machine(), please instantiate the"
             "Machine class directly, instead"
         )
@@ -155,7 +161,7 @@ class Driver:
         )
 
     def serial_stdout_on(self) -> None:
-        rootlog._print_serial_logs = True
+        logger.removeFilter(serial_logger)
 
     def serial_stdout_off(self) -> None:
-        rootlog._print_serial_logs = False
+        logger.addFilter(serial_logger)

@@ -1,10 +1,12 @@
 from pathlib import Path
+
 import io
+import logging
 import os
 import pty
 import subprocess
 
-from test_driver.logger import rootlog
+logger = logging.getLogger(__name__)
 
 
 class VLan:
@@ -29,7 +31,7 @@ class VLan:
         # TODO: don't side-effect environment here
         os.environ[f"QEMU_VDE_SOCKET_{self.nr}"] = str(self.socket_dir)
 
-        rootlog.info("start vlan")
+        logger.info("start vlan")
         pty_master, pty_slave = pty.openpty()
 
         self.process = subprocess.Popen(
@@ -48,11 +50,11 @@ class VLan:
         assert self.process.stdout is not None
         self.process.stdout.readline()
         if not (self.socket_dir / "ctl").exists():
-            rootlog.error("cannot start vde_switch")
+            raise Exception("cannot start vde_switch")
 
-        rootlog.info(f"running vlan (pid {self.pid})")
+        logger.info(f"running vlan (pid {self.pid})")
 
     def __del__(self) -> None:
-        rootlog.info(f"kill vlan (pid {self.pid})")
+        logger.info(f"kill vlan (pid {self.pid})")
         self.fd.close()
         self.process.terminate()

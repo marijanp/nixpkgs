@@ -1,12 +1,13 @@
 #! /somewhere/python3
 from pathlib import Path
+from test_driver.driver import Driver
 import argparse
-import ptpython.repl
+import logging
 import os
+import ptpython.repl
 import time
 
-from test_driver.logger import rootlog
-from test_driver.driver import Driver
+logger = logging.getLogger(__name__)
 
 
 class EnvDefault(argparse.Action):
@@ -75,7 +76,7 @@ def cli() -> None:
     args = arg_parser.parse_args()
 
     if not args.keep_vm_state:
-        rootlog.info("Machine state will be reset. To keep it, pass --keep-vm-state")
+        logger.info("Machine state will be reset. To keep it, pass --keep-vm-state")
 
     with Driver(
         args.start_scripts, args.vlans, args.testscript.read_text(), args.keep_vm_state
@@ -86,7 +87,7 @@ def cli() -> None:
             tic = time.time()
             driver.run_tests()
             toc = time.time()
-            rootlog.info(f"test script finished in {(toc-tic):.2f}s")
+            logger.info(f"test script finished in {(toc-tic):.2f}s")
 
 
 if __name__ == "__main__":

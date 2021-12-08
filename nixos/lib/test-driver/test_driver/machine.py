@@ -19,6 +19,8 @@ import tempfile
 import threading
 import time
 
+from test_driver.logger import MachineLogAdapter, machine_colours_iter
+
 logger = logging.getLogger(__name__)
 
 CHAR_TO_KEY = {
@@ -367,12 +369,12 @@ class Machine:
             extra=dict(machine=self.name, colour_code=next(machine_colours_iter)),
         )
         self.serial_logger = MachineLogAdapter(
-            logger, extra=dict(machine=self.name, colour_code=Style.dim)
+            logger, extra=dict(machine=self.name, colour_code=Style.DIM)
         )
 
     @staticmethod
     def create_startcommand(args: Dict[str, str]) -> StartCommand:
-        self.logger.warning(
+        logger.warning(
             "Using legacy create_startcommand(),"
             "please use proper nix test vm instrumentation, instead"
             "to generate the appropriate nixos test vm qemu startup script"

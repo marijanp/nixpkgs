@@ -5,6 +5,7 @@ from typing import Any, Dict, Iterator, Tuple
 from xml.sax.saxutils import XMLGenerator
 
 import codecs
+import itertools
 import logging
 import os
 import sys
@@ -31,7 +32,7 @@ class MachineLogAdapter(logging.LoggerAdapter):
 class SerialFilter(logging.Filter):
     """Drop serial logs."""
 
-    def filter(self, record):
+    def filter(self, record: logging.LogRecord) -> bool:
         return not getattr(record, "serial_logger", False)
 
 

@@ -8,6 +8,7 @@ from test_driver.logger import serial_filter
 import logging
 import os
 import tempfile
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -161,7 +162,7 @@ class Driver:
         )
 
     def serial_stdout_on(self) -> None:
-        logger.removeFilter(serial_logger)
+        logger.removeFilter(serial_filter)
 
     def serial_stdout_off(self) -> None:
-        logger.addFilter(serial_logger)
+        logger.addFilter(serial_filter)

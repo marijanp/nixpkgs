@@ -46,12 +46,12 @@ import ./make-test-python.nix ({ lib, pkgs, ... }:
                 return f"curl --fail -X post 'http://localhost:8096{path}' -H 'X-Emby-Authorization:{auth_header}'"
 
 
-        with machine.nested("Wizard completes"):
+        with subtest("Wizard completes"):
             machine.wait_until_succeeds(api_get("/Startup/Configuration"))
             machine.succeed(api_get("/Startup/FirstUser"))
             machine.succeed(api_post("/Startup/Complete"))
 
-        with machine.nested("Can login"):
+        with subtest("Can login"):
             auth_result = machine.succeed(
                 api_post(
                     "/Users/AuthenticateByName",
@@ -74,7 +74,7 @@ import ./make-test-python.nix ({ lib, pkgs, ... }:
             me = machine.succeed(api_get("/Users/Me"))
             me = json.loads(me)["Id"]
 
-        with machine.nested("Can add library"):
+        with subtest("Can add library"):
             tempdir = machine.succeed("mktemp -d -p /var/lib/jellyfin").strip()
             machine.succeed(f"chmod 755 '{tempdir}'")
 
@@ -108,7 +108,7 @@ import ./make-test-python.nix ({ lib, pkgs, ... }:
 
         retry(is_refreshed)
 
-        with machine.nested("Can identify videos"):
+        with subtest("Can identify videos"):
             items = []
 
             # For some reason, having the folder refreshed doesn't mean the
@@ -133,7 +133,7 @@ import ./make-test-python.nix ({ lib, pkgs, ... }:
             if item_info["Name"] != "Big Buck Bunny":
                 raise Exception("Jellyfin failed to properly identify file")
 
-        with machine.nested("Can read videos"):
+        with subtest("Can read videos"):
             media_source_id = item_info["MediaSources"][0]["Id"]
 
             machine.succeed(

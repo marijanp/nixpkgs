@@ -67,8 +67,8 @@ import ../make-test-python.nix ({ lib, ... }:
         return status == 0
 
 
-    with client.nested("waiting for SSH server to come up"):
-        retry(ssh_is_up)
+    client.log("waiting for SSH server to come up"):
+    retry(ssh_is_up)
 
 
     client.succeed(

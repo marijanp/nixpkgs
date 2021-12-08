@@ -71,7 +71,7 @@ in import ./make-test-python.nix {
       inherit (nodes.${node}.config.system.build) toplevel;
       switchCmd = "${toplevel}/bin/switch-to-configuration test";
     in ''
-      with machine.nested("switch to generation ${toString gen}"):
+      with subtest("switch to generation ${toString gen}"):
           machine.succeed(
               "${switchCmd}"
           )
@@ -83,7 +83,7 @@ in import ./make-test-python.nix {
 
 
     def assert_param_bits(path, bits):
-        with machine.nested(f"check bit size of {path}"):
+        with subtest(f"check bit size of {path}"):
             output = machine.succeed(f"openssl dhparam -in {path} -text")
             pattern = re.compile(r"^\s*DH Parameters:\s+\((\d+)\s+bit\)\s*$", re.M)
             match = pattern.match(output)

@@ -22,7 +22,7 @@ import ./make-test-python.nix ({ pkgs, ... }: {
     machine.wait_for_unit("airsonic.service")
     machine.wait_for_open_port(4040)
 
-    with machine.nested("Waiting for UI to work"):
-        retry(airsonic_is_up)
+    machine.log("Waiting for UI to work")
+    retry(airsonic_is_up)
   '';
 })

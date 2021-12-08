@@ -137,8 +137,8 @@ in
                 machine.log(f"Last chance to match {cls} on the window list")
             return ret == 0
 
-        with machine.nested("Waiting for a window to appear"):
-            retry(window_is_visible)
+        machine.log("Waiting for a window to appear")
+        retry(window_is_visible)
 
 
     machine.start()

@@ -410,7 +410,7 @@ let
       wait_for_vm_boot_testExtensionPack()
       machine.screenshot("cli_booted")
 
-      with machine.nested("Checking for privilege escalation"):
+      with subtest("Checking for privilege escalation"):
           machine.fail("test -e '/root/VirtualBox VMs'")
           machine.fail("test -e '/root/.config/VirtualBox'")
           machine.succeed("test -e '/home/alice/VirtualBox VMs'")
@@ -457,7 +457,7 @@ in mapAttrs (mkVBoxTest false vboxVMs) {
     wait_for_vm_boot_simple()
     machine.screenshot("cli_booted")
 
-    with machine.nested("Checking for privilege escalation"):
+    with subtest("Checking for privilege escalation"):
         machine.fail("test -e '/root/VirtualBox VMs'")
         machine.fail("test -e '/root/.config/VirtualBox'")
         machine.succeed("test -e '/home/alice/VirtualBox VMs'")

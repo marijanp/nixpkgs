@@ -118,7 +118,7 @@ in {
 
     def setup_clients_for(org, user, extra_init=no_extra_init):
         for client in [client1, client2]:
-            with client.nested(f"initialize client for user {user}"):
+            with subtest(f"initialize client for user {user}"):
                 client.succeed(
                     su(user, f"rm -rf /home/{user}/.task"),
                     su(user, "task rc.confirmation=no config confirmation no"),
@@ -126,7 +126,7 @@ in {
 
                 exportinfo = server.succeed(f"nixos-taskserver user export {org} {user}")
 
-                with client.nested("importing taskwarrior configuration"):
+                with subtest("importing taskwarrior configuration"):
                     client.succeed(su(user, f"eval {quote(exportinfo)} >&2"))
 
                 extra_init(client, org, user)
@@ -142,7 +142,7 @@ in {
 
 
     def re_add_imperative_user():
-        with server.nested("(re-)add imperative user bar"):
+        with subtest("(re-)add imperative user bar"):
             server.execute("nixos-taskserver org remove imperativeOrg")
             server.succeed(
                 "nixos-taskserver org add imperativeOrg",

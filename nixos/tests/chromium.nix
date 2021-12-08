@@ -96,7 +96,7 @@ mapAttrs (channel: chromiumPkg: makeTest rec {
 
     def create_new_win():
         """Creates a new Chromium window."""
-        with machine.nested("Creating a new Chromium window"):
+        with subtest("Creating a new Chromium window"):
             machine.wait_until_succeeds(
                 ru(
                     "${xdo "create_new_win-select_main_window" ''

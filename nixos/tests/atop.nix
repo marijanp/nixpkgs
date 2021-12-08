@@ -58,8 +58,8 @@ let assertions = rec {
                     return False
                 return True
 
-            with machine.nested("Waiting for data files"):
-                retry(has_data_files)
+            machine.log("Waiting for data files")
+            retry(has_data_files)
       '' else unit "atop.service" "inactive";
   atopRotateTimer = present:
     unit "atop-rotate.timer" (if present then "active" else "inactive");
@@ -81,8 +81,8 @@ let assertions = rec {
                     return False
                 return True
 
-            with machine.nested("Waiting for data files"):
-                retry(has_data_files)
+            machine.log("Waiting for data files")
+            retry(has_data_files)
       '' else unit "atopacct.service" "inactive";
   netatop = present:
     if present then

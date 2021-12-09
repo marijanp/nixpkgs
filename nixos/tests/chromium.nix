@@ -159,8 +159,8 @@ mapAttrs (channel: chromiumPkg: makeTest rec {
             ru("${pkgs.xclip}/bin/xclip -o")
         )
         print(f"{description} window content:\n{clipboard}")
-        with machine.nested(description):
-            yield clipboard
+        machine.log(description)
+        yield clipboard
         # Close the newly created window:
         machine.send_key("ctrl-w")
 

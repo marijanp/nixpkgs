@@ -37,29 +37,38 @@ in
     services.nginx = {
       enable = true;
       upstreams.mainsail-apiserver.servers."${moonraker.address}:${toString moonraker.port}" = { };
-      virtualHosts."${cfg.hostName}" = mkMerge [
+      virtualHosts."${cfg.hostName}" = lib.mkMerge [
         cfg.nginx
         {
-          root = mkForce "${cfg.package}/share/mainsail";
-          locations = {
-            "/" = {
-              index = "index.html";
-              tryFiles = "$uri $uri/ /index.html";
-            };
-            "/index.html".extraConfig = ''
-              add_header Cache-Control "no-store, no-cache, must-revalidate";
-            '';
-            "/websocket" = {
-              proxyWebsockets = true;
-              proxyPass = "http://mainsail-apiserver/websocket";
-            };
-            "~ ^/(printer|api|access|machine|server)/" = {
-              proxyWebsockets = true;
-              proxyPass = "http://mainsail-apiserver$request_uri";
-            };
+        root = mkForce "${cfg.package}/share/mainsail";
+        locations = {
+          "/" = {
+            index = "index.html";
+            tryFiles = "$uri $uri/ /index.html";
           };
-        }
-      ];
+          "/index.html".extraConfig = ''
+            add_header Cache-Control "no-store, no-cache, must-revalidate";
+          '';
+          "/websocket" = {
+            proxyWebsockets = true;
+            proxyPass = "http://mainsail-apiserver/websocket";
+            extraConfig = ''
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            '';
+          };
+          "~ ^/(printer|api|access|machine|server)/" = {
+            proxyWebsockets = true;
+            proxyPass = "http://mainsail-apiserver$request_uri";
+            extraConfig = ''
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            '';
+          };
+        };
+      }];
     };
   };
 }

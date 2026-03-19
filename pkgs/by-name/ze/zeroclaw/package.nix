@@ -24,6 +24,8 @@ rustPlatform.buildRustPackage (finalAttrs: {
     hash = "sha256-RlliRnf9RLIbzWh3WRIvicie8mOPN0uimiiFbFD6+tQ=";
   };
 
+  patches = [ ./xmpp.patch ];
+
   postPatch =
     let
       zeroclaw-web = callPackage ./zeroclaw-web { inherit (finalAttrs) src version; };

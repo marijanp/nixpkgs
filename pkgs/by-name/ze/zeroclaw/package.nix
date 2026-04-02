@@ -10,8 +10,6 @@
   gitMinimal,
   versionCheckHook,
   nix-update-script,
-  # makes zeroclaw-web overrideable
-  npmDepsHash ? "sha256-RMiFoPj4cbUYONURsCp4FrNuy9bR1eRWqgAnACrVXsI=",
   nixosTests,
 }:
 
@@ -30,11 +28,13 @@ rustPlatform.buildRustPackage (finalAttrs: {
     let
       zeroclaw-web = callPackage ./zeroclaw-web {
         inherit (finalAttrs) src version;
-        inherit npmDepsHash;
       };
     in
     ''
-      mkdir -p web
+      # web/dist is tracked in git (via .gitkeep) so ln -s would place the
+      # symlink inside the existing directory instead of replacing it, causing
+      # rust-embed to embed files at wrong paths.
+      rm -rf web/dist
       ln -s ${zeroclaw-web} web/dist
     '';
 

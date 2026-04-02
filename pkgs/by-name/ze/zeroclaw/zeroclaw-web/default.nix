@@ -2,14 +2,14 @@
   buildNpmPackage,
   src,
   version,
-  npmDepsHash,
-  ...
 }:
 buildNpmPackage (finalAttrs: {
   pname = "zeroclaw-web";
-  inherit src version npmDepsHash;
+  inherit src version;
 
   sourceRoot = "${finalAttrs.src.name}/web";
+
+  npmDepsHash = "sha256-RMiFoPj4cbUYONURsCp4FrNuy9bR1eRWqgAnACrVXsI=";
 
   installPhase = ''
     runHook preInstall

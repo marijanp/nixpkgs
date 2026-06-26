@@ -6,7 +6,6 @@
   ocamlPackages,
   darwin,
   makeBinaryWrapper,
-  removeReferencesTo,
   installShellFiles,
   coreutils,
   curl,
@@ -35,7 +34,6 @@ ocamlPackages.buildDunePackage (finalAttrs: {
 
   nativeBuildInputs = [
     makeBinaryWrapper
-    removeReferencesTo
     installShellFiles
     # Completions
     ocamlPackages.cmdliner
@@ -105,10 +103,6 @@ ocamlPackages.buildDunePackage (finalAttrs: {
        --mandir="$man/share/man" \
        --libdir="$lib/lib/ocaml/${ocamlPackages.ocaml.version}/site-lib" \
        nixtamal
-
-    for dep in "${ocamlPackages.ocaml}" "${ocamlPackages.camomile}"; do
-       remove-references-to -t "$dep" "$bin/bin/nixtamal"
-    done
 
     wrapProgram "$bin/bin/nixtamal" --prefix PATH : ${
       lib.makeBinPath [

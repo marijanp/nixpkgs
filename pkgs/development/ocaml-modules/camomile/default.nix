@@ -7,7 +7,6 @@
   ocaml,
   cppo,
   camlp-streams,
-  dune-site,
   version ? if lib.versionAtLeast ocaml.version "4.08" then "2.0.0" else "1.0.2",
 }:
 
@@ -46,12 +45,26 @@ let
         hash = "sha256-HklX+VPD0Ta3Knv++dBT2rhsDSlDRH90k4Cj1YtWIa8=";
       };
 
+      CAMOMILE_CONFIG = "env";
+      CAMOMILE_PREFIX = builtins.placeholder "out";
+
       nativeBuildInputs = lib.optional stdenv.hostPlatform.isDarwin darwin.sigtool;
 
-      propagatedBuildInputs = [
-        camlp-streams
-        dune-site
-      ];
+      postPatch = ''
+        substituteInPlace src/dune \
+          --replace-fail \
+            "(generate_sites_module
+ (module sites)
+ (sites camomile))
+
+" \
+            "" \
+          --replace-fail \
+            "(libraries dune-site bigarray camlp-streams)" \
+            "(libraries bigarray camlp-streams)"
+      '';
+
+      propagatedBuildInputs = [ camlp-streams ];
     };
   };
 in

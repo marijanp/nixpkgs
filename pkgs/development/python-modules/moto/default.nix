@@ -369,6 +369,9 @@ buildPythonPackage rec {
   ];
 
   disabledTestPaths = [
+    # The Panorama service model was removed from botocore 1.43.
+    "tests/test_panorama"
+
     # Flaky under parallel execution, Connection Reset errors to localhost.
     "tests/test_moto_api/recorder/test_recorder.py"
 
